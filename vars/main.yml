@@ -1,3 +1,4 @@
 ---
 
 graphite_install_path: "/opt/graphite"
+graphite_venv_path: "/opt/graphite/venv"

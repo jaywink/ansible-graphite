@@ -12,13 +12,13 @@
   when: ansible_os_family == "Debian"
 
 - name: Setup graphite with pip
-  pip: name={{ item }} state=present
+  pip: name={{ item }} state=present virtualenv={{ graphite_venv_path }} virtualenv_site_packages=yes
   with_items:
     - "https://github.com/graphite-project/ceres/tarball/master"
     - whisper
     - carbon
     - graphite-web
-    - "django==1.5" # Current version of graphite do not support 1.6
+    - django
     - django-tagging
   environment:
     PYTHONPATH: "{{ graphite_install_path }}/lib:{{ graphite_install_path }}/webapp"
@@ -44,7 +44,7 @@
   notify: restart carbon-cache
 
 - name: Inspect graphite db
-  command: python {{ graphite_install_path }}/webapp/graphite/manage.py inspectdb
+  command: {{ graphite_venv_path }}/bin/python {{ graphite_install_path }}/webapp/graphite/manage.py inspectdb
   sudo_user: "{{ graphite_user }}"
   register: result
   changed_when: False
@@ -55,12 +55,12 @@
   changed_when: False
 
 - name: Sync/create database
-  command: python {{ graphite_install_path }}/webapp/graphite/manage.py syncdb --noinput
+  command: {{ graphite_venv_path }}/bin/python {{ graphite_install_path }}/webapp/graphite/manage.py syncdb --noinput
   sudo_user: "{{ graphite_user }}"
   when: result.stdout.find("AccountMygraph") == -1
 
 - name: Create superuser account
-  command: python {{ graphite_install_path }}/webapp/graphite/manage.py createsuperuser --username={{ graphite_admin_username }} --email={{ graphite_admin_email }} --noinput
+  command: {{ graphite_venv_path }}/bin/python {{ graphite_install_path }}/webapp/graphite/manage.py createsuperuser --username={{ graphite_admin_username }} --email={{ graphite_admin_email }} --noinput
   sudo_user: "{{ graphite_user }}"
   register: superuser_created
   args:
@@ -72,7 +72,7 @@
   register: debug2
 
 - name: Set superuser password
-  shell: "python {{ graphite_install_path }}/webapp/graphite/manage.py shell < /tmp/createsuperuser.py"
+  shell: "{{ graphite_venv_path }}/bin/python {{ graphite_install_path }}/webapp/graphite/manage.py shell < /tmp/createsuperuser.py"
   sudo_user: "{{ graphite_user }}"
   when: superuser_created|changed
 

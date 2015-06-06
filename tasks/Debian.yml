@@ -1,4 +1,4 @@
---- 
+---
 
 - name: Install packages with apt
   apt: name={{ item }} state=present
@@ -14,7 +14,7 @@
     - sudo
 
 - name: Use the pip package, version 13
-  pip: name="Twisted==13.0" state=present
+  pip: name="Twisted==13.0" state=present virtualenv={{ graphite_venv_path }} virtualenv_site_packages=yes
 
 - name: Install init.d script for carbon-cache
   template: src=debian_carbon_service.j2 dest=/etc/init.d/carbon-cache

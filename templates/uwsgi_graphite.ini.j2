@@ -8,3 +8,4 @@ module = wsgi:application
 {% if ansible_os_family == "RedHat" %}
 pidfile = /run/uwsgi/graphite/pid
 {% endif %}
+virtualenv = {{ graphite_venv_path }}

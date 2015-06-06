@@ -5,7 +5,7 @@
 # Required-Start:    $remote_fs $syslog
 # Required-Stop:    $remote_fs $syslog
 # Default-Start:    2 3 4 5
-# Default-Stop:        
+# Default-Stop:
 # Short-Description:    carbon-cache server
 ### END INIT INFO
 
@@ -24,10 +24,12 @@ fi
 
 export PATH="${PATH:+$PATH:}/usr/sbin:/sbin"
 export PYTHONPATH="{{ graphite_install_path }}/lib:{{ graphite_install_path }}/webapp"
+VIRTUALENV={{ graphite_venv_path }}
 
 case "$1" in
   start)
     log_daemon_msg "Starting carbon-cache daemon" "carbon-cache" || true
+    . $VIRTUALENV/bin/activate
     if {{ graphite_install_path }}/bin/carbon-cache.py start; then
         log_end_msg 0 || true
     else
@@ -36,6 +38,7 @@ case "$1" in
     ;;
   stop)
     log_daemon_msg "Stopping carbon-cache daemon" "carbon-cache" || true
+    . $VIRTUALENV/bin/activate
     if {{ graphite_install_path }}/bin/carbon-cache.py stop; then
         log_end_msg 0 || true
     else
@@ -45,6 +48,7 @@ case "$1" in
 
   restart)
     log_daemon_msg "Restarting carbon-cache daemon" "carbon-cache" || true
+    . $VIRTUALENV/bin/activate
     {{ graphite_install_path }}/bin/carbon-cache.py stop
     if {{ graphite_install_path }}/bin/carbon-cache.py start; then
         log_end_msg 0 || true
@@ -54,6 +58,7 @@ case "$1" in
     ;;
 
   status)
+    . $VIRTUALENV/bin/activate
     {{ graphite_install_path }}/bin/carbon-cache.py status && exit 0 || exit $?
     ;;
 
